@@ -1,0 +1,42 @@
+[I 16:48:40.356 NotebookApp] [jupyter_nbextensions_configurator] enabled 0.4.1
+[I 16:48:40.357 NotebookApp] Serving notebooks from local directory: /home/mmvc/mmvc-ad-teach/Sam_scene_crowd/ai_augmented_scene_crowd_analysis/circle
+[I 16:48:40.357 NotebookApp] The Jupyter Notebook is running at:
+[I 16:48:40.357 NotebookApp] http://localhost:8888/?token=7edd768cfa885b3ac1b6a8ba53f0b49208f4b819e2e6514c
+[I 16:48:40.357 NotebookApp]  or http://127.0.0.1:8888/?token=7edd768cfa885b3ac1b6a8ba53f0b49208f4b819e2e6514c
+[I 16:48:40.357 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 16:48:40.359 NotebookApp] 
+    
+    To access the notebook, open this file in a browser:
+        file:///home/mmvc/.local/share/jupyter/runtime/nbserver-28806-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/?token=7edd768cfa885b3ac1b6a8ba53f0b49208f4b819e2e6514c
+     or http://127.0.0.1:8888/?token=7edd768cfa885b3ac1b6a8ba53f0b49208f4b819e2e6514c
+[I 16:48:44.244 NotebookApp] Interrupted...
+[I 16:48:44.244 NotebookApp] Shutting down 0 kernels
+[I 16:49:09.831 NotebookApp] [jupyter_nbextensions_configurator] enabled 0.4.1
+[I 16:49:09.832 NotebookApp] Serving notebooks from local directory: /home/mmvc/mmvc-ad-teach/Sam_scene_crowd/ai_augmented_scene_crowd_analysis/circle
+[I 16:49:09.833 NotebookApp] The Jupyter Notebook is running at:
+[I 16:49:09.833 NotebookApp] http://localhost:8888/?token=59c850f82eec10445609df2971c9a6c30c7640faa8422bcf
+[I 16:49:09.834 NotebookApp]  or http://127.0.0.1:8888/?token=59c850f82eec10445609df2971c9a6c30c7640faa8422bcf
+[I 16:49:09.834 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 16:49:09.837 NotebookApp] 
+    
+    To access the notebook, open this file in a browser:
+        file:///home/mmvc/.local/share/jupyter/runtime/nbserver-28812-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8888/?token=59c850f82eec10445609df2971c9a6c30c7640faa8422bcf
+     or http://127.0.0.1:8888/?token=59c850f82eec10445609df2971c9a6c30c7640faa8422bcf
+[I 16:53:49.644 NotebookApp] 302 GET / (127.0.0.1) 0.49ms
+[I 16:53:49.669 NotebookApp] 302 GET /tree? (127.0.0.1) 1.24ms
+[I 16:53:58.284 NotebookApp] 302 POST /login?next=%2Ftree%3F (127.0.0.1) 4.02ms
+[I 16:57:36.243 NotebookApp] Uploading file to /utils/dbscan.py
+[W 17:01:56.983 NotebookApp] delete /utils/draw.py
+[W 17:01:56.989 NotebookApp] Skipping trash for /home/mmvc/mmvc-ad-teach/Sam_scene_crowd/ai_augmented_scene_crowd_analysis/circle/utils/draw.py, on different device to home directory
+[I 17:03:00.813 NotebookApp] Uploading file to /utils/draw.py
+[I 19:06:40.802 NotebookApp] Uploading file to /models/backbone_mobilenetv3.py
+[I 19:06:58.591 NotebookApp] Uploading file to /models/mobilenetv3-small-55df8e1f.pth
+[I 19:07:00.445 NotebookApp] Saving file at /models/mobilenetv3-small-55df8e1f.pth
+[I 22:36:43.457 NotebookApp] 302 GET / (127.0.0.1) 1.54ms
+[I 14:53:30.333 NotebookApp] 302 GET / (127.0.0.1) 1.54ms
+[C 14:53:47.599 NotebookApp] received signal 15, stopping
+[I 14:53:47.600 NotebookApp] Shutting down 0 kernels

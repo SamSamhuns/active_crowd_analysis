@@ -1,0 +1,1 @@
+outputs/ssd_mobilnet_v2/model_final.pth
