@@ -49,7 +49,7 @@ def run_demo(cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type):
 
     person_label_idx = class_names.index('person')
     centroid_tracker = CentroidTracker()
-    wfile = open('outputs/MOT16-02.txt', 'w')
+    wfile = open('py-motmetrics/motmetrics/data/MOT16/predicted/MOT16-02.txt', 'w')
     inference_times = []
 
     for i, image_path in enumerate(image_paths):
