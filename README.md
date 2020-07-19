@@ -114,7 +114,9 @@ All metrics can be generated independently by following the Jupyter Notebook `di
 -   Run `python generate_multi_person_tracking_predictions --config-file --config-file configs/mobilenet_v2_ssd320_voc0712.yaml`
     to generate the predictions which are saved in `py-motmetrics/motmetrics/data/MOT16/predicted/MOT16-02.txt`
 
-**Note** The ground truth files are already present in `py-motmetrics/motmetrics/data/MOT16/gt`
+**IMPORTANT Note** Only pedestrian class values from the ground truth file with visibility ratio of more than `0.7` are used and a score threshold of `0.65` is used for all classifiers. We use `py-motmetrics/motmetrics/data/drop_non_pedestrian_data.py` to do our filtering.
+
+**Note** However, the filtered ground truth files are already present in `py-motmetrics/motmetrics/data/MOT16/gt`
 
 ### Generating Metrics
 
