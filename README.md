@@ -135,6 +135,7 @@ For more information on running py-motmetrics, check `SSD_active_crowd_analysis/
 The SSD code is derived from <https://github.com/lufficc/SSD> and the circlenet is derived from <https://github.com/NoodleHam/Circular-Bounding-Box-SSD>
 
 -   py-motmetrics <https://github.com/cheind/py-motmetrics>
--   circlenet <https://github.com/NoodleHam/Circular-Bounding-Box-SSD>
 -   SSD <https://github.com/lufficc/SSD>
 -   pytorch SSD <https://github.com/amdegroot/ssd.pytorch>
+-   circlenet <https://github.com/NoodleHam/Circular-Bounding-Box-SSD>
+-   pytorch PeeleNet <https://github.com/hoya012/pytorch-peleenet>
