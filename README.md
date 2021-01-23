@@ -1,6 +1,6 @@
 # Active Crowd Analysis: Pandemic Risk Mitigation for the Blind or Visually Impaired
 
-Paper accepted at the 2020 ECCV Conference [ACVR Workshop](https://iplab.dmi.unict.it/acvr2020/program). The [paper](https://github.com/SamSamhuns/active_crowd_analysis/blob/master/Active%20Crowd%20Analysis.pdf) is also available in this repository.
+Paper accepted at the 2020 ECCV Conference [ACVR Workshop](https://iplab.dmi.unict.it/acvr2020/program). The paper is available at this [ECCV Springer link](https://link.springer.com/chapter/10.1007%2F978-3-030-66823-5_25) and also [hosted](https://github.com/SamSamhuns/active_crowd_analysis/blob/master/Active%20Crowd%20Analysis.pdf) in this repository.
 
 ## Result Reproduction Instructions
 
