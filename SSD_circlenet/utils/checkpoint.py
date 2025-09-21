@@ -4,17 +4,18 @@ import os
 import torch
 
 
-
 class CheckPointer:
-    _last_checkpoint_name = 'last_checkpoint.txt'
+    _last_checkpoint_name = "last_checkpoint.txt"
 
-    def __init__(self,
-                 model,
-                 optimizer=None,
-                 scheduler=None,
-                 save_dir="",
-                 save_to_disk=None,
-                 logger=None):
+    def __init__(
+        self,
+        model,
+        optimizer=None,
+        scheduler=None,
+        save_dir="",
+        save_to_disk=None,
+        logger=None,
+    ):
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
@@ -32,7 +33,7 @@ class CheckPointer:
             return
 
         data = {}
-        data['model'] = self.model.state_dict()
+        data["model"] = self.model.state_dict()
         if self.optimizer is not None:
             data["optimizer"] = self.optimizer.state_dict()
         if self.scheduler is not None:

@@ -26,7 +26,9 @@ def evaluation(cfg, ckpt, distributed):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='SSD Evaluation on VOC and COCO dataset.')
+    parser = argparse.ArgumentParser(
+        description="SSD Evaluation on VOC and COCO dataset."
+    )
     parser.add_argument(
         "--config-file",
         default="",
@@ -42,7 +44,12 @@ def main():
         type=str,
     )
 
-    parser.add_argument("--output_dir", default="eval_results", type=str, help="The directory to store evaluation results.")
+    parser.add_argument(
+        "--output_dir",
+        default="eval_results",
+        type=str,
+        help="The directory to store evaluation results.",
+    )
 
     parser.add_argument(
         "opts",
@@ -80,5 +87,5 @@ def main():
     evaluation(cfg, ckpt=args.ckpt, distributed=distributed)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

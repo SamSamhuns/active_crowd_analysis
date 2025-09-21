@@ -11,7 +11,6 @@ def euclidean(x, y):
 
 
 class DBSCAN:
-
     def __init__(self, eps=0.5, min_samples=1, metric=euclidean):
         """
         The cluster labels are set in self._labels after DBSCAN.fit(X) is called
@@ -62,8 +61,9 @@ class DBSCAN:
         :param idx:
         :return: np.array of neighbouring points
         """
-        return np.array([i for i, x in enumerate(X)
-                         if self.metric(x, X[idx]) <= self.eps])
+        return np.array(
+            [i for i, x in enumerate(X) if self.metric(x, X[idx]) <= self.eps]
+        )
 
     def _grow_cluster(self, idx, curr_id, neigh_pts_idx, X):
         self._labels[idx] = curr_id

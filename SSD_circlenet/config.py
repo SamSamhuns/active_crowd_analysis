@@ -3,7 +3,7 @@ from yacs.config import CfgNode as CN
 _C = CN()
 
 _C.MODEL = CN()
-_C.MODEL.META_ARCHITECTURE = 'SSDDetector'
+_C.MODEL.META_ARCHITECTURE = "SSDDetector"
 _C.MODEL.DEVICE = "cuda"
 # match default boxes to any ground truth with jaccard overlap higher than a threshold (0.5)
 _C.MODEL.THRESHOLD = 0.5
@@ -25,10 +25,10 @@ _C.MODEL.PRIORS.MAX_SIZES = [105, 150, 195, 240, 285, 330]
 # instead of having aspect ratios, the circular anchors will have additional anchors
 # a zoom of 0 means same size as min size; zoom of 1 means same size as max size
 _C.MODEL.PRIORS.ADDITIONAL_ZOOMS = [0.3, 0.7]
-#_C.MODEL.PRIORS.BOXES_PER_LOCATION = [4, 4, 4, 4, 4, 4]
+# _C.MODEL.PRIORS.BOXES_PER_LOCATION = [4, 4, 4, 4, 4, 4]
 _C.MODEL.PRIORS.BOXES_PER_LOCATION = [1, 1, 1, 1, 1, 1]
 _C.MODEL.PRIORS.CLIP = True
-    # backbone / output
+# backbone / output
 _C.MODEL.BACKBONE = CN()
 _C.MODEL.BACKBONE.OUT_CHANNELS = (96, 1280, 512, 256, 256, 64)
 
@@ -46,7 +46,7 @@ _C.INPUT.PIXEL_MEAN = [123, 117, 104]
 # -----------------------------------------------------------------------------
 _C.DATASETS = CN()
 # List of the dataset names for training, as present in paths_catalog.py
-_C.DATASETS.TRAIN = ("voc_2007_trainval","voc_2012_trainval")
+_C.DATASETS.TRAIN = ("voc_2007_trainval", "voc_2012_trainval")
 # List of the dataset names for testing, as present in paths_catalog.py
 _C.DATASETS.TEST = ("voc_2007_test",)
 
@@ -88,7 +88,7 @@ _C.TEST.MAX_PER_CLASS = -1
 _C.TEST.MAX_PER_IMAGE = 100
 _C.TEST.BATCH_SIZE = 10
 
-_C.OUTPUT_DIR = 'outputs/ssd_mobilnet_v2'
+_C.OUTPUT_DIR = "outputs/ssd_mobilnet_v2"
 
 
 def get_default_config():

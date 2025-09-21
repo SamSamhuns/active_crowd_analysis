@@ -3,7 +3,6 @@ import logging
 import os
 
 import torch
-import torch.distributed as dist
 
 from ssd.engine.inference import do_evaluation
 from ssd.config import cfg
@@ -19,12 +18,14 @@ from ssd.utils.misc import str2bool
 
 
 def train(cfg, args):
-    logger = logging.getLogger('SSD.trainer')
+    logger = logging.getLogger("SSD.trainer")
     model = build_detection_model(cfg)
     device = torch.device(cfg.MODEL.DEVICE)
     model.to(device)
     if args.distributed:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank)
+        model = torch.nn.parallel.DistributedDataParallel(
+            model, device_ids=[args.local_rank], output_device=args.local_rank
+        )
 
     lr = cfg.SOLVER.LR * args.num_gpus  # scale by num gpus
     optimizer = make_optimizer(cfg, model, lr)
@@ -34,19 +35,39 @@ def train(cfg, args):
 
     arguments = {"iteration": 0}
     save_to_disk = dist_util.get_rank() == 0
-    checkpointer = CheckPointer(model, optimizer, scheduler, cfg.OUTPUT_DIR, save_to_disk, logger)
+    checkpointer = CheckPointer(
+        model, optimizer, scheduler, cfg.OUTPUT_DIR, save_to_disk, logger
+    )
     extra_checkpoint_data = checkpointer.load()
     arguments.update(extra_checkpoint_data)
 
     max_iter = cfg.SOLVER.MAX_ITER // args.num_gpus
-    train_loader = make_data_loader(cfg, is_train=True, distributed=args.distributed, max_iter=max_iter, start_iter=arguments['iteration'])
+    train_loader = make_data_loader(
+        cfg,
+        is_train=True,
+        distributed=args.distributed,
+        max_iter=max_iter,
+        start_iter=arguments["iteration"],
+    )
 
-    model = do_train(cfg, model, train_loader, optimizer, scheduler, checkpointer, device, arguments, args)
+    model = do_train(
+        cfg,
+        model,
+        train_loader,
+        optimizer,
+        scheduler,
+        checkpointer,
+        device,
+        arguments,
+        args,
+    )
     return model
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Single Shot MultiBox Detector Training With PyTorch')
+    parser = argparse.ArgumentParser(
+        description="Single Shot MultiBox Detector Training With PyTorch"
+    )
     parser.add_argument(
         "--config-file",
         default="",
@@ -55,10 +76,19 @@ def main():
         type=str,
     )
     parser.add_argument("--local_rank", type=int, default=0)
-    parser.add_argument('--log_step', default=10, type=int, help='Print logs every log_step')
-    parser.add_argument('--save_step', default=2500, type=int, help='Save checkpoint every save_step')
-    parser.add_argument('--eval_step', default=2500, type=int, help='Evaluate dataset every eval_step, disabled when eval_step < 0')
-    parser.add_argument('--use_tensorboard', default=True, type=str2bool)
+    parser.add_argument(
+        "--log_step", default=10, type=int, help="Print logs every log_step"
+    )
+    parser.add_argument(
+        "--save_step", default=2500, type=int, help="Save checkpoint every save_step"
+    )
+    parser.add_argument(
+        "--eval_step",
+        default=2500,
+        type=int,
+        help="Evaluate dataset every eval_step, disabled when eval_step < 0",
+    )
+    parser.add_argument("--use_tensorboard", default=True, type=str2bool)
     parser.add_argument(
         "--skip-test",
         dest="skip_test",
@@ -105,10 +135,10 @@ def main():
     model = train(cfg, args)
 
     if not args.skip_test:
-        logger.info('Start evaluating...')
+        logger.info("Start evaluating...")
         torch.cuda.empty_cache()  # speed up evaluating after training finished
         do_evaluation(cfg, model, distributed=args.distributed)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

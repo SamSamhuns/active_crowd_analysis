@@ -9,7 +9,7 @@ from .inference import PostProcessor
 from .loss import MultiBoxLoss
 
 
-@registry.BOX_HEADS.register('SSDBoxHead')
+@registry.BOX_HEADS.register("SSDBoxHead")
 class SSDBoxHead(nn.Module):
     def __init__(self, cfg):
         super().__init__()
@@ -27,8 +27,10 @@ class SSDBoxHead(nn.Module):
             return self._forward_test(cls_logits, bbox_pred)
 
     def _forward_train(self, cls_logits, bbox_pred, targets):
-        gt_boxes, gt_labels = targets['boxes'], targets['labels']
-        reg_loss, cls_loss = self.loss_evaluator(cls_logits, bbox_pred, gt_labels, gt_boxes)
+        gt_boxes, gt_labels = targets["boxes"], targets["labels"]
+        reg_loss, cls_loss = self.loss_evaluator(
+            cls_logits, bbox_pred, gt_labels, gt_boxes
+        )
         loss_dict = dict(
             reg_loss=reg_loss,
             cls_loss=cls_loss,
@@ -41,7 +43,10 @@ class SSDBoxHead(nn.Module):
             self.priors = PriorBox(self.cfg)().to(bbox_pred.device)
         scores = F.softmax(cls_logits, dim=2)
         boxes = box_utils.convert_locations_to_boxes(
-            bbox_pred, self.priors, self.cfg.MODEL.CENTER_VARIANCE, self.cfg.MODEL.SIZE_VARIANCE
+            bbox_pred,
+            self.priors,
+            self.cfg.MODEL.CENTER_VARIANCE,
+            self.cfg.MODEL.SIZE_VARIANCE,
         )
         boxes = box_utils.center_form_to_corner_form(boxes)
         detections = (scores, boxes)

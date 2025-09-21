@@ -26,8 +26,8 @@ def is_main_process():
 
 def synchronize():
     """
-       Helper function to synchronize (barrier) among all processes when
-       using distributed training
+    Helper function to synchronize (barrier) among all processes when
+    using distributed training
     """
     if not dist.is_available():
         return
@@ -50,7 +50,7 @@ def _encode(encoded_data, data):
     assert s <= 255, "Can't encode data greater than 255 bytes"
     # put the encoded data in encoded_data
     encoded_data[0] = s
-    encoded_data[1: (s + 1)] = tensor
+    encoded_data[1 : (s + 1)] = tensor
 
 
 def all_gather(data):

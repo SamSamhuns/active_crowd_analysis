@@ -27,10 +27,10 @@ class Container:
         return self
 
     def to(self, *args, **kwargs):
-        return self._call('to', *args, **kwargs)
+        return self._call("to", *args, **kwargs)
 
     def numpy(self):
-        return self._call('numpy')
+        return self._call("numpy")
 
     def resize(self, size):
         """resize boxes
@@ -39,14 +39,14 @@ class Container:
         Returns:
             self
         """
-        img_width = getattr(self, 'img_width', -1)
-        img_height = getattr(self, 'img_height', -1)
+        img_width = getattr(self, "img_width", -1)
+        img_height = getattr(self, "img_height", -1)
         assert img_width > 0 and img_height > 0
-        assert 'boxes' in self._data_dict
-        boxes = self._data_dict['boxes']
+        assert "boxes" in self._data_dict
+        boxes = self._data_dict["boxes"]
         new_width, new_height = size
-        boxes[:, 0::2] *= (new_width / img_width)
-        boxes[:, 1::2] *= (new_height / img_height)
+        boxes[:, 0::2] *= new_width / img_width
+        boxes[:, 1::2] *= new_height / img_height
         return self
 
     def __repr__(self):

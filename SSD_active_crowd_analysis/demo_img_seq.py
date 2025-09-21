@@ -19,17 +19,23 @@ from distance_regressor.models import DistanceRegrNet
 from distance_regressor.utils import Standardizer, load_model_weight, load_standardizer
 
 from ssd.utils.misc import reset_range
-from ssd.utils.heatmap import generate_cv2_heatmap, generate_sns_kde_heatmap, generate_sk_gaussian_mixture
+from ssd.utils.heatmap import (
+    generate_cv2_heatmap,
+    generate_sns_kde_heatmap,
+    generate_sk_gaussian_mixture,
+)
 
 
 @torch.no_grad()
-def run_demo(cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type, gen_heatmap):
+def run_demo(
+    cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type, gen_heatmap
+):
     if dataset_type == "voc":
         class_names = VOCDataset.class_names
-    elif dataset_type == 'coco':
+    elif dataset_type == "coco":
         class_names = COCODataset.class_names
     else:
-        raise NotImplementedError('Not implemented now.')
+        raise NotImplementedError("Not implemented now.")
 
     if torch.cuda.is_available():
         device = torch.device(cfg.MODEL.DEVICE)
@@ -41,9 +47,9 @@ def run_demo(cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type, g
     checkpointer = CheckPointer(model, save_dir=cfg.OUTPUT_DIR)
     checkpointer.load(ckpt, use_latest=ckpt is None)
     weight_file = ckpt if ckpt else checkpointer.get_checkpoint_file()
-    print('Loaded weights from {}'.format(weight_file))
+    print("Loaded weights from {}".format(weight_file))
 
-    image_paths = glob.glob(os.path.join(images_dir, '*.jpg'))
+    image_paths = glob.glob(os.path.join(images_dir, "*.jpg"))
     mkdir(output_dir)
 
     cpu_device = torch.device("cpu")
@@ -55,7 +61,7 @@ def run_demo(cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type, g
     dist_regr_model.eval()
     X_scaler = load_standardizer(Standardizer())
 
-    person_label_idx = class_names.index('person')
+    person_label_idx = class_names.index("person")
 
     for i, image_path in enumerate(image_paths):
         start = time.time()
@@ -71,11 +77,10 @@ def run_demo(cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type, g
         inference_time = time.time() - start
 
         result = result.resize((width, height)).to(cpu_device).numpy()
-        boxes, labels, scores = result['boxes'], result['labels'], result['scores']
+        boxes, labels, scores = result["boxes"], result["labels"], result["scores"]
 
         # remove all non person class detections
-        indices = np.logical_and(scores > score_threshold,
-                                 labels == person_label_idx)
+        indices = np.logical_and(scores > score_threshold, labels == person_label_idx)
         boxes = boxes[indices]
         labels = labels[indices]
         scores = scores[indices]
@@ -109,31 +114,46 @@ def run_demo(cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type, g
             X = np.column_stack((width, height))
             X_scaled = X_scaler.transform(X)
             distances = dist_regr_model(torch.Tensor(X_scaled).to(device))
-            print(f"Distance Regr Inference time {round(time.time() - start_time, 4) * 1000}ms")
+            print(
+                f"Distance Regr Inference time {round(time.time() - start_time, 4) * 1000}ms"
+            )
 
             if gen_heatmap:
                 generate_sns_kde_heatmap(centers[:, 0], centers[:, 1], i, image_name)
 
-                generate_sk_gaussian_mixture(centers, dbscan_center._labels, i, image_name,
-                                             len(set(dbscan_center._labels)),
-                                             covariance_type='diag')
+                generate_sk_gaussian_mixture(
+                    centers,
+                    dbscan_center._labels,
+                    i,
+                    image_name,
+                    len(set(dbscan_center._labels)),
+                    covariance_type="diag",
+                )
 
-                generate_cv2_heatmap(centers, dbscan_center._labels, i, image_name,
-                                     len(set(dbscan_center._labels)),
-                                     covariance_type='diag'
-                                     )
+                generate_cv2_heatmap(
+                    centers,
+                    dbscan_center._labels,
+                    i,
+                    image_name,
+                    len(set(dbscan_center._labels)),
+                    covariance_type="diag",
+                )
 
-        meters = ' | '.join(
+        meters = " | ".join(
             [
-                'objects {:02d}'.format(len(boxes)),
-                'load {:03d}ms'.format(round(load_time * 1000)),
-                'inference {:03d}ms'.format(round(inference_time * 1000)),
-                'FPS {}'.format(round(1.0 / inference_time))
+                "objects {:02d}".format(len(boxes)),
+                "load {:03d}ms".format(round(load_time * 1000)),
+                "inference {:03d}ms".format(round(inference_time * 1000)),
+                "FPS {}".format(round(1.0 / inference_time)),
             ]
         )
-        print('({:04d}/{:04d}) {}: {}'.format(i + 1, len(image_paths), image_name, meters))
+        print(
+            "({:04d}/{:04d}) {}: {}".format(i + 1, len(image_paths), image_name, meters)
+        )
 
-        drawn_image = draw_boxes(image, boxes, labels, scores, distances, class_names).astype(np.uint8)
+        drawn_image = draw_boxes(
+            image, boxes, labels, scores, distances, class_names
+        ).astype(np.uint8)
         Image.fromarray(drawn_image).save(os.path.join(output_dir, image_name))
 
 
@@ -146,14 +166,27 @@ def main():
         help="path to config file",
         type=str,
     )
-    parser.add_argument('-gen_heatmap', action='store_true')
+    parser.add_argument("-gen_heatmap", action="store_true")
     parser.add_argument("--ckpt", type=str, default=None, help="Trained weights.")
     parser.add_argument("--score_threshold", type=float, default=0.35)
-    parser.add_argument("--images_dir", default='demo', type=str, help='Specify a image dir to do prediction.')
-    parser.add_argument("--output_dir", default='demo/result', type=str,
-                        help='Specify a image dir to save predicted images.')
-    parser.add_argument("--dataset_type", default="voc", type=str,
-                        help='Specify dataset type. Currently support voc and coco.')
+    parser.add_argument(
+        "--images_dir",
+        default="demo",
+        type=str,
+        help="Specify a image dir to do prediction.",
+    )
+    parser.add_argument(
+        "--output_dir",
+        default="demo/result",
+        type=str,
+        help="Specify a image dir to save predicted images.",
+    )
+    parser.add_argument(
+        "--dataset_type",
+        default="voc",
+        type=str,
+        help="Specify dataset type. Currently support voc and coco.",
+    )
 
     parser.add_argument(
         "opts",
@@ -174,14 +207,16 @@ def main():
         print(config_str)
     print("Running with config:\n{}".format(cfg))
 
-    run_demo(cfg=cfg,
-             ckpt=args.ckpt,
-             score_threshold=args.score_threshold,
-             images_dir=args.images_dir,
-             output_dir=args.output_dir,
-             dataset_type=args.dataset_type,
-             gen_heatmap=args.gen_heatmap)
+    run_demo(
+        cfg=cfg,
+        ckpt=args.ckpt,
+        score_threshold=args.score_threshold,
+        images_dir=args.images_dir,
+        output_dir=args.output_dir,
+        dataset_type=args.dataset_type,
+        gen_heatmap=args.gen_heatmap,
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

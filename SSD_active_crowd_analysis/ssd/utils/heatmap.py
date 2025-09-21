@@ -17,7 +17,9 @@ def generate_sns_kde_heatmap(x, y, i=0, image_name=""):
         fig = sns.kdeplot(x, y, cmap=cm.jet, shade=True)
         fig = fig.get_figure()
         plt.scatter(x, y, 3)
-        fig.savefig(f'demo/result/{image_name.split(".")[0]}_snshmap{i}.{image_name.split(".")[1]}')
+        fig.savefig(
+            f"demo/result/{image_name.split('.')[0]}_snshmap{i}.{image_name.split('.')[1]}"
+        )
         print(f"seaborn kde plot time {round((time.time() - start) * 1000, 3)}ms")
         plt.clf()
     except Exception as e:
@@ -25,11 +27,7 @@ def generate_sns_kde_heatmap(x, y, i=0, image_name=""):
         print(e)
 
 
-def generate_kde_heatmap(centers,
-                         i=0,
-                         image_name="",
-                         grid_size=1,
-                         radius=30):
+def generate_kde_heatmap(centers, i=0, image_name="", grid_size=1, radius=30):
     """
     WARNING Slow
     KDE Quartic kernel plot
@@ -43,7 +41,7 @@ def generate_kde_heatmap(centers,
         :return:
         """
         dn = d / h
-        P = (15 / 16) * (1 - dn ** 2) ** 2
+        P = (15 / 16) * (1 - dn**2) ** 2
         return P
 
     start = time.time()
@@ -85,22 +83,21 @@ def generate_kde_heatmap(centers,
     # heatmap output
     intensity = np.array(intensity_list)
     plt.pcolormesh(x_mesh, y_mesh, intensity)
-    plt.plot(x, y, 'ro')  # plot center points
+    plt.plot(x, y, "ro")  # plot center points
     plt.xticks([])
     plt.yticks([])
     plt.gca().invert_yaxis()
-    plt.savefig(f'demo/result/{image_name.split(".")[0]}_{i}.{image_name.split(".")[1]}')
+    plt.savefig(
+        f"demo/result/{image_name.split('.')[0]}_{i}.{image_name.split('.')[1]}"
+    )
     plt.clf()
 
-    print("Heatmap generation time", round((time.time() - start) * 1000, 3), 'ms')
+    print("Heatmap generation time", round((time.time() - start) * 1000, 3), "ms")
 
 
-def generate_cv2_heatmap(centers,
-                         center_labels,
-                         i=0,
-                         image_name=None,
-                         n_components=3,
-                         covariance_type='diag'):
+def generate_cv2_heatmap(
+    centers, center_labels, i=0, image_name=None, n_components=3, covariance_type="diag"
+):
     start = time.time()
 
     # fit a Gaussian Mixture Model with two components
@@ -119,24 +116,37 @@ def generate_cv2_heatmap(centers,
 
     heatmap2 = cv2.resize(-heatmap, (800, 600))
     heatmapshow = None
-    heatmapshow = cv2.normalize(heatmap2, heatmapshow, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+    heatmapshow = cv2.normalize(
+        heatmap2,
+        heatmapshow,
+        alpha=0,
+        beta=255,
+        norm_type=cv2.NORM_MINMAX,
+        dtype=cv2.CV_8U,
+    )
     heatmapshow = cv2.applyColorMap(heatmapshow, cv2.COLORMAP_JET)
 
     if image_name is not None:
-        fname = f'demo/result/{image_name.split(".")[0]}_cv2_{i}.{image_name.split(".")[1]}'
+        fname = (
+            f"demo/result/{image_name.split('.')[0]}_cv2_{i}.{image_name.split('.')[1]}"
+        )
         cv2.imwrite(fname, heatmapshow)
 
-    print(f"GMM Contour & OpenCV Heat map time {round((time.time() - start) * 1000, 3)}ms")
+    print(
+        f"GMM Contour & OpenCV Heat map time {round((time.time() - start) * 1000, 3)}ms"
+    )
     return heatmapshow
 
 
-def generate_sk_gaussian_mixture(centers,
-                                 center_labels,
-                                 i=0,
-                                 image_name="",
-                                 n_components=3,
-                                 covariance_type='diag',
-                                 draw_contour=False):
+def generate_sk_gaussian_mixture(
+    centers,
+    center_labels,
+    i=0,
+    image_name="",
+    n_components=3,
+    covariance_type="diag",
+    draw_contour=False,
+):
     """
     Sklearn Gaussian Mixture Model
     """
@@ -159,18 +169,21 @@ def generate_sk_gaussian_mixture(centers,
     if draw_contour:
         plt.contour(X, Y, Z, levels=20, cmap=cm.jet)
         plt.scatter(X_train[:, 0], X_train[:, 1], 3)
-        plt.title('GMM clusters')
-        plt.axis('tight')
+        plt.title("GMM clusters")
+        plt.axis("tight")
         plt.gca().invert_yaxis()
-        plt.savefig(f'demo/result/{image_name.split(".")[0]}_gmm_cont{i}.{image_name.split(".")[1]}')
+        plt.savefig(
+            f"demo/result/{image_name.split('.')[0]}_gmm_cont{i}.{image_name.split('.')[1]}"
+        )
         plt.clf()
 
     heatmap = Z
     plt.scatter(X_train[:, 0], X_train[:, 1], 3)
-    plt.imshow(-heatmap, interpolation='bilinear', origin='lower',
-               cmap=cm.jet)
+    plt.imshow(-heatmap, interpolation="bilinear", origin="lower", cmap=cm.jet)
     plt.gca().invert_yaxis()
-    plt.savefig(f'demo/result/{image_name.split(".")[0]}_gmm_hmap{i}.{image_name.split(".")[1]}')
+    plt.savefig(
+        f"demo/result/{image_name.split('.')[0]}_gmm_hmap{i}.{image_name.split('.')[1]}"
+    )
     plt.clf()
 
     print(f"GMM Contour & Heat map time {round((time.time() - start) * 1000, 3)}ms")

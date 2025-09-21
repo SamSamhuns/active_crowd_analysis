@@ -17,10 +17,10 @@ class PriorBox:
 
     def __call__(self):
         """Generate SSD Prior Boxes.
-            It returns the center, height and width of the priors. The values are relative to the image size
-            Returns:
-                priors (num_priors, 4): The prior boxes represented as [[center_x, center_y, w, h]]. All the values
-                    are relative to the image size.
+        It returns the center, height and width of the priors. The values are relative to the image size
+        Returns:
+            priors (num_priors, 4): The prior boxes represented as [[center_x, center_y, w, h]]. All the values
+                are relative to the image size.
         """
         priors = []
         for k, f in enumerate(self.feature_maps):

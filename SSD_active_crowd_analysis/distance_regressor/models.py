@@ -27,12 +27,14 @@ class DistanceRegrNet(torch.nn.Module):
 
 
 class Model:
-    def __init__(self,
-                 hp,
-                 regr_nn=DistanceRegrNet(2),
-                 criterion=None,
-                 optimizer=None,
-                 scheduler=None):
+    def __init__(
+        self,
+        hp,
+        regr_nn=DistanceRegrNet(2),
+        criterion=None,
+        optimizer=None,
+        scheduler=None,
+    ):
         """
         The reduction for criterion must be set to summmation
         """
@@ -41,23 +43,30 @@ class Model:
         self.loss_train_overtime = []
         self.loss_val_overtime = []
 
-        self.criterion = nn.MSELoss(
-            reduction='sum') if criterion is None else criterion
+        self.criterion = nn.MSELoss(reduction="sum") if criterion is None else criterion
 
-        self.optimizer = torch.optim.Adam(self.regr_nn.parameters(),
-                                          lr=self.hp.lr,
-                                          betas=self.hp.betas,
-                                          weight_decay=self.hp.weight_decay) if optimizer is None else optimizer
+        self.optimizer = (
+            torch.optim.Adam(
+                self.regr_nn.parameters(),
+                lr=self.hp.lr,
+                betas=self.hp.betas,
+                weight_decay=self.hp.weight_decay,
+            )
+            if optimizer is None
+            else optimizer
+        )
 
-        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            self.optimizer, mode='min', factor=0.1, patience=5, verbose=True) if scheduler is None else scheduler
+        self.scheduler = (
+            torch.optim.lr_scheduler.ReduceLROnPlateau(
+                self.optimizer, mode="min", factor=0.1, patience=5, verbose=True
+            )
+            if scheduler is None
+            else scheduler
+        )
 
-    def fit(self,
-            train_data_loader,
-            device,
-            val_data_loader=None,
-            save_wt_interval=None):
-
+    def fit(
+        self, train_data_loader, device, val_data_loader=None, save_wt_interval=None
+    ):
         for epoch in range(self.hp.epochs):
             running_loss_train = 0
             train_count = 0
@@ -73,9 +82,11 @@ class Model:
 
                 running_loss_train += loss.item()
                 if save_wt_interval is not None and idx % save_wt_interval:
-                    os.makedirs('distance_regressor/weights', exist_ok=True)
-                    torch.save(self.regr_nn.state_dict(),
-                               f'distance_regressor/weights/regrNN_epoch_{epoch}_iter_{idx}.pt')
+                    os.makedirs("distance_regressor/weights", exist_ok=True)
+                    torch.save(
+                        self.regr_nn.state_dict(),
+                        f"distance_regressor/weights/regrNN_epoch_{epoch}_iter_{idx}.pt",
+                    )
                 train_count += X_data.shape[0]
 
             if val_data_loader is not None:
@@ -84,19 +95,21 @@ class Model:
                 for X_val_data, y_val_data in val_data_loader:
                     val_count += X_val_data.shape[0]
                     y_val_hat = self.regr_nn(X_val_data.to(device))
-                    running_loss_val += self.criterion(y_val_hat,
-                                                       y_val_data.to(device))
+                    running_loss_val += self.criterion(y_val_hat, y_val_data.to(device))
 
                 # RMSE and RMSE log have the sqrt term
-                if isinstance(self.criterion, RMSELoss) or isinstance(self.criterion, RMSELogLoss):
+                if isinstance(self.criterion, RMSELoss) or isinstance(
+                    self.criterion, RMSELogLoss
+                ):
                     val_count = val_count ** (1 / 2)
                 avg_val_loss = running_loss_val / val_count
-                print(
-                    f"Avg Validation loss at epoch {epoch} is {avg_val_loss}")
+                print(f"Avg Validation loss at epoch {epoch} is {avg_val_loss}")
                 self.loss_val_overtime.append(avg_val_loss)
                 self.scheduler.step(running_loss_val)
 
-            if isinstance(self.criterion, RMSELoss) or isinstance(self.criterion, RMSELogLoss):
+            if isinstance(self.criterion, RMSELoss) or isinstance(
+                self.criterion, RMSELogLoss
+            ):
                 train_count = train_count ** (1 / 2)
             avg_loss_train = running_loss_train / train_count
             self.loss_train_overtime.append(avg_loss_train)
@@ -106,16 +119,14 @@ class Model:
         return self.regr_nn(x)
 
     @staticmethod
-    def line_plot(loss1,
-                  loss2=None,
-                  labels=None,
-                  title='MSE Loss overtime',
-                  save_fig_path=None):
+    def line_plot(
+        loss1, loss2=None, labels=None, title="MSE Loss overtime", save_fig_path=None
+    ):
         """
         labels is list of labels
         """
         if labels is None:
-            labels = ['loss1']
+            labels = ["loss1"]
 
         plt.figure(figsize=(12, 8))
         plt.title(title)
@@ -131,9 +142,13 @@ class Model:
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
 
-    def plot_loss(self, title='MSE Loss overtime'):
-        Model.line_plot(self.loss_train_overtime, self.loss_val_overtime,
-                        ['Train loss', 'Val loss'], title=title)
+    def plot_loss(self, title="MSE Loss overtime"):
+        Model.line_plot(
+            self.loss_train_overtime,
+            self.loss_val_overtime,
+            ["Train loss", "Val loss"],
+            title=title,
+        )
 
     def save_model(self, save_path):
         torch.save(self.regr_nn.state_dict(), save_path)

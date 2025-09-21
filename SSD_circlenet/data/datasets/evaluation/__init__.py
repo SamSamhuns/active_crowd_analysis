@@ -14,7 +14,10 @@ def evaluate(dataset, predictions, output_dir, **kwargs):
         evaluation result
     """
     args = dict(
-        dataset=dataset, predictions=predictions, output_dir=output_dir, **kwargs,
+        dataset=dataset,
+        predictions=predictions,
+        output_dir=output_dir,
+        **kwargs,
     )
     if isinstance(dataset, VOCDataset):
         return voc_evaluation(**args)

@@ -35,6 +35,7 @@ try:
     import importlib.util
 except ImportError:
     import imp
+
     _module_is_available = _module_is_available_py2
 else:
     _module_is_available = _module_is_available_py3
@@ -69,7 +70,7 @@ def linear_sum_assignment(costs, solver=None):
         # Try resolve from string
         solver = solver_map.get(solver, None)
 
-    assert callable(solver), 'Invalid LAP solver.'
+    assert callable(solver), "Invalid LAP solver."
     rids, cids = solver(costs)
     rids = np.asarray(rids).astype(int)
     cids = np.asarray(cids).astype(int)
@@ -112,7 +113,8 @@ def add_expensive_edges(costs):
 
 def _exclude_missing_edges(costs, rids, cids):
     subset = [
-        index for index, (i, j) in enumerate(zip(rids, cids))
+        index
+        for index, (i, j) in enumerate(zip(rids, cids))
         if np.isfinite(costs[i, j])
     ]
     return rids[subset], cids[subset]
@@ -154,8 +156,9 @@ def lsa_solve_munkres(costs):
     finite_costs = _zero_pad_to_square(finite_costs)
     indices = np.array(m.compute(finite_costs), dtype=int)
     # Exclude extra matches from extension to square matrix.
-    indices = indices[(indices[:, 0] < costs.shape[0])
-                      & (indices[:, 1] < costs.shape[1])]
+    indices = indices[
+        (indices[:, 0] < costs.shape[0]) & (indices[:, 1] < costs.shape[1])
+    ]
     rids, cids = indices[:, 0], indices[:, 1]
     rids, cids = _exclude_missing_edges(costs, rids, cids)
     return rids, cids
@@ -172,7 +175,7 @@ def _zero_pad_to_square(costs):
 
 
 def lsa_solve_ortools(costs):
-    """Solves the LSA problem using Google's optimization tools. """
+    """Solves the LSA problem using Google's optimization tools."""
     from ortools.graph import pywrapgraph
 
     if costs.shape[0] != costs.shape[1]:
@@ -180,13 +183,13 @@ def lsa_solve_ortools(costs):
         # Non-square problem will be infeasible.
         # Default to scipy solver rather than add extra zeros.
         # (This maintains the same behaviour as previous versions.)
-        return linear_sum_assignment(costs, solver='scipy')
+        return linear_sum_assignment(costs, solver="scipy")
 
     rs, cs = np.isfinite(costs).nonzero()  # pylint: disable=unbalanced-tuple-unpacking
     finite_costs = costs[rs, cs]
     scale = find_scale_for_integer_approximation(finite_costs)
     if scale != 1:
-        warnings.warn('costs are not integers; using approximation')
+        warnings.warn("costs are not integers; using approximation")
     int_costs = np.round(scale * finite_costs).astype(int)
 
     assignment = pywrapgraph.LinearSumAssignment()
@@ -203,7 +206,7 @@ def lsa_solve_ortools(costs):
     except AssertionError:
         # Default to scipy solver rather than add finite edges.
         # (This maintains the same behaviour as previous versions.)
-        return linear_sum_assignment(costs, solver='scipy')
+        return linear_sum_assignment(costs, solver="scipy")
 
     return _ortools_extract_solution(assignment)
 
@@ -246,10 +249,14 @@ def find_scale_for_integer_approximation(costs, base=10, log_max_scale=8, log_sa
     e = max(e, 0)
     # Ensure that the scale is not too large.
     if e > log_max_scale:
-        warnings.warn('could not achieve desired resolution for approximation: '
-                      'want exponent %d but max is %d', e, log_max_scale)
+        warnings.warn(
+            "could not achieve desired resolution for approximation: "
+            "want exponent %d but max is %d",
+            e,
+            log_max_scale,
+        )
         e = log_max_scale
-    scale = base ** e
+    scale = base**e
     return scale
 
 
@@ -263,11 +270,11 @@ def _ortools_assert_is_optimal(pywrapgraph, status):
     if status == pywrapgraph.LinearSumAssignment.OPTIMAL:
         pass
     elif status == pywrapgraph.LinearSumAssignment.INFEASIBLE:
-        raise AssertionError('ortools: infeasible assignment problem')
+        raise AssertionError("ortools: infeasible assignment problem")
     elif status == pywrapgraph.LinearSumAssignment.POSSIBLE_OVERFLOW:
-        raise AssertionError('ortools: possible overflow in assignment problem')
+        raise AssertionError("ortools: possible overflow in assignment problem")
     else:
-        raise AssertionError('ortools: unknown status')
+        raise AssertionError("ortools: unknown status")
 
 
 def _ortools_extract_solution(assignment):
@@ -310,11 +317,11 @@ def _init_standard_solvers():
     global available_solvers, default_solver, solver_map  # pylint: disable=global-statement
 
     solvers = [
-        ('lapsolver', lsa_solve_lapsolver),
-        ('lap', lsa_solve_lapjv),
-        ('scipy', lsa_solve_scipy),
-        ('munkres', lsa_solve_munkres),
-        ('ortools', lsa_solve_ortools),
+        ("lapsolver", lsa_solve_lapsolver),
+        ("lap", lsa_solve_lapjv),
+        ("scipy", lsa_solve_scipy),
+        ("munkres", lsa_solve_munkres),
+        ("ortools", lsa_solve_ortools),
     ]
 
     solver_map = dict(solvers)
@@ -322,7 +329,10 @@ def _init_standard_solvers():
     available_solvers = [s[0] for s in solvers if _module_is_available(s[0])]
     if len(available_solvers) == 0:
         default_solver = None
-        warnings.warn('No standard LAP solvers found. Consider `pip install lapsolver` or `pip install scipy`', category=RuntimeWarning)
+        warnings.warn(
+            "No standard LAP solvers found. Consider `pip install lapsolver` or `pip install scipy`",
+            category=RuntimeWarning,
+        )
     else:
         default_solver = available_solvers[0]
 

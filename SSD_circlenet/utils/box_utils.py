@@ -4,8 +4,8 @@ import numpy as np
 
 PI = 3.14
 
-def convert_locations_to_boxes(locations, priors, center_variance,
-                               size_variance):
+
+def convert_locations_to_boxes(locations, priors, center_variance, size_variance):
     """Convert regressional location results of SSD into boxes in the form of (center_x, center_y, h, w).
 
     The conversion:
@@ -30,9 +30,9 @@ def convert_locations_to_boxes(locations, priors, center_variance,
     #         loc_batch[i].append(loc_batch[i][-1])
     #         print("after:" + str(loc_batch[i]))
 
-    #locations = torch.stack((locations[..., 0], locations[..., 1], locations[..., -1], locations[..., -1]), dim=locations.dim()-1)
+    # locations = torch.stack((locations[..., 0], locations[..., 1], locations[..., -1], locations[..., -1]), dim=locations.dim()-1)
 
-    #print(locations[..., 2:])
+    # print(locations[..., 2:])
     if priors.dim() + 1 == locations.dim():
         priors = priors.unsqueeze(0)
     # print(torch.cat([
@@ -40,20 +40,31 @@ def convert_locations_to_boxes(locations, priors, center_variance,
     #     torch.exp(locations[..., 2:] * size_variance) * priors[..., 2:]
     # ], dim=locations.dim() - 1)[0])
     # quit()
-    return torch.cat([
-        locations[..., :2] * center_variance * priors[..., 2:] + priors[..., :2],
-        torch.exp(locations[..., 2:] * size_variance) * priors[..., 2:]
-    ], dim=locations.dim() - 1)
+    return torch.cat(
+        [
+            locations[..., :2] * center_variance * priors[..., 2:] + priors[..., :2],
+            torch.exp(locations[..., 2:] * size_variance) * priors[..., 2:],
+        ],
+        dim=locations.dim() - 1,
+    )
 
 
-def convert_boxes_to_locations(center_form_boxes, center_form_priors, center_variance, size_variance):
+def convert_boxes_to_locations(
+    center_form_boxes, center_form_priors, center_variance, size_variance
+):
     # priors can have one dimension less
     if center_form_priors.dim() + 1 == center_form_boxes.dim():
         center_form_priors = center_form_priors.unsqueeze(0)
-    return torch.cat([
-        (center_form_boxes[..., :2] - center_form_priors[..., :2]) / center_form_priors[..., 2:] / center_variance,
-        torch.log(center_form_boxes[..., 2:] / center_form_priors[..., 2:]) / size_variance
-    ], dim=center_form_boxes.dim() - 1)
+    return torch.cat(
+        [
+            (center_form_boxes[..., :2] - center_form_priors[..., :2])
+            / center_form_priors[..., 2:]
+            / center_variance,
+            torch.log(center_form_boxes[..., 2:] / center_form_priors[..., 2:])
+            / size_variance,
+        ],
+        dim=center_form_boxes.dim() - 1,
+    )
 
 
 def area_of(left_top, right_bottom) -> torch.Tensor:
@@ -103,8 +114,8 @@ def iou_of_circles(boxes0, boxes1, eps=1e-5):
     """
     r0s = boxes0[..., 2]
     r1s = boxes1[..., 2]
-    areas0 = (r0s * r0s)
-    areas1 = (r1s * r1s)
+    areas0 = r0s * r0s
+    areas1 = r1s * r1s
 
     # np.linalg.norm(B.x - A.x, B.y - A.y)
     # print("utils gt boxes shape: " + str(boxes0.shape))
@@ -119,7 +130,7 @@ def iou_of_circles(boxes0, boxes1, eps=1e-5):
     a0s = areas0
     a1s = areas1
 
-    x = (a0s - a1s + distances*distances) / (2 * distances)
+    x = (a0s - a1s + distances * distances) / (2 * distances)
     z = x * x
     y = torch.sqrt(a0s - z)
 
@@ -130,20 +141,26 @@ def iou_of_circles(boxes0, boxes1, eps=1e-5):
     # print("r0+r1 shape: {}".format((r0s + r1s).shape))
     # print("overlap shape op1: {}".format(overlap_areas.shape))
     # print("mask shape 1: {}".format((distances < (r0s + r1s)).shape))
-    containment_circles_mask = (distances < torch.abs(r0s - r1s))
+    containment_circles_mask = distances < torch.abs(r0s - r1s)
     # print("mask shape 2: {}".format(containment_circles_mask.shape))
 
-    overlap_areas[containment_circles_mask] = PI * (torch.min(a0s, a1s)[containment_circles_mask])
+    overlap_areas[containment_circles_mask] = (
+        PI * (torch.min(a0s, a1s)[containment_circles_mask])
+    )
     # non containment circles that have non-zero overlap
-    n_mask = (distances >= torch.abs(r0s - r1s))
-    overlap_areas[n_mask] = (a0s * torch.asin(y / r0s)\
-                            + a1s * torch.asin(y / r1s) - y * (x + torch.sqrt(z + a1s - a0s)))[n_mask]
+    n_mask = distances >= torch.abs(r0s - r1s)
+    overlap_areas[n_mask] = (
+        a0s * torch.asin(y / r0s)
+        + a1s * torch.asin(y / r1s)
+        - y * (x + torch.sqrt(z + a1s - a0s))
+    )[n_mask]
     overlap_areas[distances >= (r0s + r1s)] = 0
-    return overlap_areas / (PI*areas0 + PI*areas1 - overlap_areas + eps)
+    return overlap_areas / (PI * areas0 + PI * areas1 - overlap_areas + eps)
 
 
-def assign_priors(center_form_gt_circles, gt_labels, center_form_prior_circles,
-                  iou_threshold):
+def assign_priors(
+    center_form_gt_circles, gt_labels, center_form_prior_circles, iou_threshold
+):
     """Assign ground truth boxes and targets to priors.
 
     Args:
@@ -155,7 +172,9 @@ def assign_priors(center_form_gt_circles, gt_labels, center_form_prior_circles,
         labels (num_priros): labels for priors.
     """
     # size: num_priors x num_targets
-    ious = iou_of_circles(center_form_gt_circles.unsqueeze(0), center_form_prior_circles.unsqueeze(1))
+    ious = iou_of_circles(
+        center_form_gt_circles.unsqueeze(0), center_form_prior_circles.unsqueeze(1)
+    )
     # size: num_priors
     best_target_per_prior, best_target_per_prior_index = ious.max(1)
     # size: num_targets
@@ -198,17 +217,24 @@ def hard_negative_mining(loss, labels, neg_pos_ratio):
 
 
 def center_form_to_corner_form(locations):
-    return torch.cat([locations[..., :2] - locations[..., 2:] / 2,
-                      locations[..., :2] + locations[..., 2:] / 2], locations.dim() - 1)
+    return torch.cat(
+        [
+            locations[..., :2] - locations[..., 2:] / 2,
+            locations[..., :2] + locations[..., 2:] / 2,
+        ],
+        locations.dim() - 1,
+    )
 
 
 def corner_form_to_center_form(boxes):
-    return torch.cat([
-        (boxes[..., :2] + boxes[..., 2:]) / 2,
-        boxes[..., 2:] - boxes[..., :2]
-    ], boxes.dim() - 1)
+    return torch.cat(
+        [(boxes[..., :2] + boxes[..., 2:]) / 2, boxes[..., 2:] - boxes[..., :2]],
+        boxes.dim() - 1,
+    )
 
 
 def corner_form_to_center_form_numpy(boxes):
-    boxes[..., :] = np.concatenate(((boxes[..., :2] + boxes[..., 2:]) / 2, boxes[..., 2:] - boxes[..., :2]), 1)
+    boxes[..., :] = np.concatenate(
+        ((boxes[..., :2] + boxes[..., 2:]) / 2, boxes[..., 2:] - boxes[..., :2]), 1
+    )
     return boxes

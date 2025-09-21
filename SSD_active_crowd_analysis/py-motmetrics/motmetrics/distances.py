@@ -16,7 +16,7 @@ import numpy as np
 from motmetrics import math_util
 
 
-def norm2squared_matrix(objs, hyps, max_d2=float('inf')):
+def norm2squared_matrix(objs, hyps, max_d2=float("inf")):
     """Computes the squared Euclidean distance matrix between object and hypothesis points.
 
     Params
@@ -48,7 +48,7 @@ def norm2squared_matrix(objs, hyps, max_d2=float('inf')):
     assert hyps.shape[1] == objs.shape[1], "Dimension mismatch"
 
     delta = objs[:, np.newaxis] - hyps[np.newaxis, :]
-    C = np.sum(delta ** 2, axis=-1)
+    C = np.sum(delta**2, axis=-1)
 
     C[C > max_d2] = np.nan
     return C
@@ -76,11 +76,14 @@ def boxiou(a, b):
     a_vol = np.prod(a_size, axis=-1)
     b_vol = np.prod(b_size, axis=-1)
     u_vol = a_vol + b_vol - i_vol
-    return np.where(i_vol == 0, np.zeros_like(i_vol, dtype=np.float),
-                    math_util.quiet_divide(i_vol, u_vol))
+    return np.where(
+        i_vol == 0,
+        np.zeros_like(i_vol, dtype=np.float),
+        math_util.quiet_divide(i_vol, u_vol),
+    )
 
 
-def iou_matrix(objs, hyps, max_iou=1.):
+def iou_matrix(objs, hyps, max_iou=1.0):
     """Computes 'intersection over union (IoU)' distance matrix between object and hypothesis rectangles.
 
     The IoU is computed as

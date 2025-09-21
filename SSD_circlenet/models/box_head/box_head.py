@@ -1,4 +1,3 @@
-import torch
 from torch import nn
 import torch.nn.functional as F
 
@@ -27,7 +26,7 @@ class SSDBoxHead(nn.Module):
 
     def _forward_train(self, cls_logits, bbox_pred, targets):
         # drop the height of boxes
-        gt_boxes, gt_labels = targets['boxes'], targets['labels']
+        gt_boxes, gt_labels = targets["boxes"], targets["labels"]
 
         # average box w and h into side length
         # for i, boxes_batch in enumerate(gt_boxes):
@@ -38,7 +37,9 @@ class SSDBoxHead(nn.Module):
         # print(gt_boxes[:][:][:][2] + gt_boxes[:][:][:][3])
         # gt_boxes = torch.narrow(gt_boxes, 2, 0, 3)
 
-        reg_loss, cls_loss = self.loss_evaluator(cls_logits, bbox_pred, gt_labels, gt_boxes)
+        reg_loss, cls_loss = self.loss_evaluator(
+            cls_logits, bbox_pred, gt_labels, gt_boxes
+        )
         loss_dict = dict(
             reg_loss=reg_loss,
             cls_loss=cls_loss,
@@ -50,10 +51,13 @@ class SSDBoxHead(nn.Module):
         if self.priors is None:
             self.priors = PriorBox(self.cfg)().to(bbox_pred.device)
         scores = F.softmax(cls_logits, dim=2)
-        #print(bbox_pred[0])
-        #print(self.priors[0])
+        # print(bbox_pred[0])
+        # print(self.priors[0])
         boxes = box_utils.convert_locations_to_boxes(
-            bbox_pred, self.priors, self.cfg.MODEL.CENTER_VARIANCE, self.cfg.MODEL.SIZE_VARIANCE
+            bbox_pred,
+            self.priors,
+            self.cfg.MODEL.CENTER_VARIANCE,
+            self.cfg.MODEL.SIZE_VARIANCE,
         )
         boxes = box_utils.center_form_to_corner_form(boxes)
         detections = (scores, boxes)

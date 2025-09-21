@@ -15,8 +15,7 @@ import numpy as np
 
 import motmetrics as mm
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     # Create an accumulator that will be updated during each frame
     acc = mm.MOTAccumulator(auto_id=True)
 
@@ -25,56 +24,49 @@ if __name__ == '__main__':
 
     # 2 Matches, 1 False alarm
     acc.update(
-        [1, 2],                 # Ground truth objects in this frame
-        [1, 2, 3],                  # Detector hypotheses in this frame
-        [[0.1, np.nan, 0.3],        # Distances from object 1 to hypotheses 1, 2, 3
-         [0.5, 0.2, 0.3]]        # Distances from object 2 to hypotheses 1, 2,
+        [1, 2],  # Ground truth objects in this frame
+        [1, 2, 3],  # Detector hypotheses in this frame
+        [
+            [0.1, np.nan, 0.3],  # Distances from object 1 to hypotheses 1, 2, 3
+            [0.5, 0.2, 0.3],
+        ],  # Distances from object 2 to hypotheses 1, 2,
     )
     print(acc.events)
 
     # 1 Match, 1 Miss
-    df = acc.update(
-        [1, 2],
-        [1],
-        [[0.2], [0.4]]
-    )
+    df = acc.update([1, 2], [1], [[0.2], [0.4]])
     print(df)
 
     # 1 Match, 1 Switch
-    df = acc.update(
-        [1, 2],
-        [1, 3],
-        [[0.6, 0.2],
-         [0.1, 0.6]]
-    )
+    df = acc.update([1, 2], [1, 3], [[0.6, 0.2], [0.1, 0.6]])
     print(df)
 
     # Compute metrics
 
     mh = mm.metrics.create()
-    summary = mh.compute(acc, metrics=['num_frames', 'mota', 'motp'], name='acc')
+    summary = mh.compute(acc, metrics=["num_frames", "mota", "motp"], name="acc")
     print(summary)
 
     summary = mh.compute_many(
         [acc, acc.events.loc[0:1]],
-        metrics=['num_frames', 'mota', 'motp'],
-        names=['full', 'part'])
+        metrics=["num_frames", "mota", "motp"],
+        names=["full", "part"],
+    )
     print(summary)
 
     strsummary = mm.io.render_summary(
         summary,
-        formatters={'mota': '{:.2%}'.format},
-        namemap={'mota': 'MOTA', 'motp': 'MOTP'}
+        formatters={"mota": "{:.2%}".format},
+        namemap={"mota": "MOTA", "motp": "MOTP"},
     )
     print(strsummary)
 
     summary = mh.compute_many(
         [acc, acc.events.loc[0:1]],
         metrics=mm.metrics.motchallenge_metrics,
-        names=['full', 'part'])
+        names=["full", "part"],
+    )
     strsummary = mm.io.render_summary(
-        summary,
-        formatters=mh.formatters,
-        namemap=mm.io.motchallenge_metric_names
+        summary, formatters=mh.formatters, namemap=mm.io.motchallenge_metric_names
     )
     print(strsummary)

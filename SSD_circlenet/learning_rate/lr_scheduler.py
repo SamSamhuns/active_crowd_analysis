@@ -4,11 +4,18 @@ from torch.optim.lr_scheduler import _LRScheduler
 
 
 class WarmupMultiStepLR(_LRScheduler):
-    def __init__(self, optimizer, milestones, gamma=0.1, warmup_factor=1.0 / 3,
-                 warmup_iters=500, last_epoch=-1):
+    def __init__(
+        self,
+        optimizer,
+        milestones,
+        gamma=0.1,
+        warmup_factor=1.0 / 3,
+        warmup_iters=500,
+        last_epoch=-1,
+    ):
         if not list(milestones) == sorted(milestones):
             raise ValueError(
-                "Milestones should be a list of" " increasing integers. Got {}",
+                "Milestones should be a list of increasing integers. Got {}",
                 milestones,
             )
 

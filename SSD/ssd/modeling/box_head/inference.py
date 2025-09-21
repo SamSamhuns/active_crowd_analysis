@@ -17,7 +17,10 @@ class PostProcessor:
         batch_size = batches_scores.size(0)
         results = []
         for batch_id in range(batch_size):
-            scores, boxes = batches_scores[batch_id], batches_boxes[batch_id]  # (N, #CLS) (N, 4)
+            scores, boxes = (
+                batches_scores[batch_id],
+                batches_boxes[batch_id],
+            )  # (N, #CLS) (N, 4)
             num_boxes = scores.shape[0]
             num_classes = scores.shape[1]
 
@@ -36,7 +39,9 @@ class PostProcessor:
             labels = labels.reshape(-1)
 
             # remove low scoring boxes
-            indices = torch.nonzero(scores > self.cfg.TEST.CONFIDENCE_THRESHOLD).squeeze(1)
+            indices = torch.nonzero(
+                scores > self.cfg.TEST.CONFIDENCE_THRESHOLD
+            ).squeeze(1)
             boxes, scores, labels = boxes[indices], scores[indices], labels[indices]
 
             boxes[:, 0::2] *= self.width
@@ -44,7 +49,7 @@ class PostProcessor:
 
             keep = batched_nms(boxes, scores, labels, self.cfg.TEST.NMS_THRESHOLD)
             # keep only topk scoring predictions
-            keep = keep[:self.cfg.TEST.MAX_PER_IMAGE]
+            keep = keep[: self.cfg.TEST.MAX_PER_IMAGE]
             boxes, scores, labels = boxes[keep], scores[keep], labels[keep]
 
             container = Container(boxes=boxes, labels=labels, scores=scores)

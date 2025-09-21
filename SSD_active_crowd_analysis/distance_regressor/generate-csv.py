@@ -1,16 +1,17 @@
-'''
+"""
 Purpose: Generates csv file of annotations from .txts
-'''
+"""
+
 import pandas as pd
 import os
 from tqdm import tqdm
 import argparse
 
-argparser = argparse.ArgumentParser(description='Generate annotations csv file from .txts')
-argparser.add_argument('-i', '--input',
-                       help='input dir name')
-argparser.add_argument('-o', '--output',
-                       help='output file name')
+argparser = argparse.ArgumentParser(
+    description="Generate annotations csv file from .txts"
+)
+argparser.add_argument("-i", "--input", help="input dir name")
+argparser.add_argument("-o", "--output", help="output file name")
 
 args = argparser.parse_args()
 
@@ -18,7 +19,7 @@ args = argparser.parse_args()
 INPUTDIR = args.input
 FILENAME = args.output
 
-'''
+"""
 #Values    Name      Description
 ----------------------------------------------------------------------------
    1    type         Describes the type of object: 'Car', 'Van', 'Truck',
@@ -37,38 +38,57 @@ FILENAME = args.output
    1    rotation_y   Rotation ry around Y-axis in camera coordinates [-pi..pi]
    1    score        Only for results: Float, indicating confidence in
                      detection, needed for p/r curves, higher is better.
-'''
+"""
 
-df = pd.DataFrame(columns=['filename', 'class', 'truncated', 'occluded', 'observation angle', \
-                           'xmin', 'ymin', 'xmax', 'ymax', 'height', 'width', 'length', \
-                           'xloc', 'yloc', 'zloc', 'rot_y'])
+df = pd.DataFrame(
+    columns=[
+        "filename",
+        "class",
+        "truncated",
+        "occluded",
+        "observation angle",
+        "xmin",
+        "ymin",
+        "xmax",
+        "ymax",
+        "height",
+        "width",
+        "length",
+        "xloc",
+        "yloc",
+        "zloc",
+        "rot_y",
+    ]
+)
+
 
 def assign_values(filename, idx, list_to_assign):
-    df.at[idx, 'filename'] = filename
+    df.at[idx, "filename"] = filename
 
-    df.at[idx, 'class'] = list_to_assign[0]
-    df.at[idx, 'truncated'] = list_to_assign[1]
-    df.at[idx, 'occluded'] = list_to_assign[2]
-    df.at[idx, 'observation angle'] = list_to_assign[3]
+    df.at[idx, "class"] = list_to_assign[0]
+    df.at[idx, "truncated"] = list_to_assign[1]
+    df.at[idx, "occluded"] = list_to_assign[2]
+    df.at[idx, "observation angle"] = list_to_assign[3]
 
     # bbox coordinates
-    df.at[idx, 'xmin'] = list_to_assign[4]
-    df.at[idx, 'ymin'] = list_to_assign[5]
-    df.at[idx, 'xmax'] = list_to_assign[6]
-    df.at[idx, 'ymax'] = list_to_assign[7]
+    df.at[idx, "xmin"] = list_to_assign[4]
+    df.at[idx, "ymin"] = list_to_assign[5]
+    df.at[idx, "xmax"] = list_to_assign[6]
+    df.at[idx, "ymax"] = list_to_assign[7]
 
     # 3D object dimensions
-    df.at[idx, 'height'] = list_to_assign[8]
-    df.at[idx, 'width'] = list_to_assign[9]
-    df.at[idx, 'length'] = list_to_assign[10]
+    df.at[idx, "height"] = list_to_assign[8]
+    df.at[idx, "width"] = list_to_assign[9]
+    df.at[idx, "length"] = list_to_assign[10]
 
     # 3D object location
-    df.at[idx, 'xloc'] = list_to_assign[11]
-    df.at[idx, 'yloc'] = list_to_assign[12]
-    df.at[idx, 'zloc'] = list_to_assign[13]
+    df.at[idx, "xloc"] = list_to_assign[11]
+    df.at[idx, "yloc"] = list_to_assign[12]
+    df.at[idx, "zloc"] = list_to_assign[13]
 
     # rotation around y-axis in camera coordinates
-    df.at[idx, 'rot_y'] = list_to_assign[14]
+    df.at[idx, "rot_y"] = list_to_assign[14]
+
 
 all_files = sorted(os.listdir(INPUTDIR))
 pbar = tqdm(total=len(all_files), position=1)
@@ -76,12 +96,12 @@ pbar = tqdm(total=len(all_files), position=1)
 count = 0
 for idx, f in enumerate(all_files):
     pbar.update(1)
-    file_object = open(INPUTDIR + f, 'r')
+    file_object = open(INPUTDIR + f, "r")
     file_content = [x.strip() for x in file_object.readlines()]
 
     for line in file_content:
         elements = line.split()
-        if elements[0] == 'DontCare':
+        if elements[0] == "DontCare":
             continue
 
         assign_values(f, count, elements)

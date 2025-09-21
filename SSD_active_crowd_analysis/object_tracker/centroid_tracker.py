@@ -4,7 +4,7 @@ from collections import OrderedDict
 import numpy as np
 
 
-class CentroidTracker():
+class CentroidTracker:
     def __init__(self, max_frame_tracking=50):
         """
         :param max_frame_tracking: max number of frames to wait
@@ -47,9 +47,15 @@ class CentroidTracker():
         # if no objects currently tracked take input centroids and register each of them
         if len(self.obj_centroids) == 0:
             if input_bbox is None:
-                _ = [self.register(input_centroids[i]) for i in range(len(input_centroids))]
+                _ = [
+                    self.register(input_centroids[i])
+                    for i in range(len(input_centroids))
+                ]
             else:
-                _ = [self.register(input_centroids[i], input_bbox[i]) for i in range(len(input_centroids))]
+                _ = [
+                    self.register(input_centroids[i], input_bbox[i])
+                    for i in range(len(input_centroids))
+                ]
         # else match the input centroids to existing object centroids
         else:
             objectIDs = list(self.obj_centroids.keys())
@@ -61,7 +67,7 @@ class CentroidTracker():
             cols = D.argmin(axis=1)[rows]
             usedRows, usedCols = set(), set()
 
-            for (row, col) in zip(rows, cols):
+            for row, col in zip(rows, cols):
                 if row in usedRows or col in usedCols:
                     continue
 

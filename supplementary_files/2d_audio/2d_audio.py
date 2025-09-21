@@ -16,8 +16,10 @@ if __name__ == "__main__":
     y(vertical axis)
 
     """
-    source = SoundSource(position=[0, 0, 0],
-                         velocity=[0, 0, 0],)
+    source = SoundSource(
+        position=[0, 0, 0],
+        velocity=[0, 0, 0],
+    )
 
     source.looping = True
     data = load_wav_file("beep.wav")
@@ -30,7 +32,7 @@ if __name__ == "__main__":
         time.sleep(0.1)
 
     while True:
-        x_pos = 5*math.sin(math.radians(t))
+        x_pos = 5 * math.sin(math.radians(t))
         source.position = [source.position[0], source.position[1], source.position[2]]
         sink.update()
         print("playing at %r" % source.position)

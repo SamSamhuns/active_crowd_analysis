@@ -1,8 +1,6 @@
 from .ssd_detector import SSDDetector
 
-_DETECTION_META_ARCHITECTURES = {
-    "SSDDetector": SSDDetector
-}
+_DETECTION_META_ARCHITECTURES = {"SSDDetector": SSDDetector}
 
 
 def build_detection_model(cfg):

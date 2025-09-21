@@ -50,13 +50,21 @@ def compute_on_dataset(model, data_loader, device):
     return results_dict
 
 
-def inference(model, data_loader, dataset_name, device, output_folder=None, use_cached=False, **kwargs):
+def inference(
+    model,
+    data_loader,
+    dataset_name,
+    device,
+    output_folder=None,
+    use_cached=False,
+    **kwargs,
+):
     dataset = data_loader.dataset
     logger = logging.getLogger("SSD.inference")
     logger.info("Evaluating {} dataset({} images):".format(dataset_name, len(dataset)))
-    predictions_path = os.path.join(output_folder, 'predictions.pth')
+    predictions_path = os.path.join(output_folder, "predictions.pth")
     if use_cached and os.path.exists(predictions_path):
-        predictions = torch.load(predictions_path, map_location='cpu')
+        predictions = torch.load(predictions_path, map_location="cpu")
     else:
         predictions = compute_on_dataset(model, data_loader, device)
         synchronize()
@@ -65,7 +73,9 @@ def inference(model, data_loader, dataset_name, device, output_folder=None, use_
         return
     if output_folder:
         torch.save(predictions, predictions_path)
-    return evaluate(dataset=dataset, predictions=predictions, output_dir=output_folder, **kwargs)
+    return evaluate(
+        dataset=dataset, predictions=predictions, output_dir=output_folder, **kwargs
+    )
 
 
 @torch.no_grad()
@@ -80,6 +90,8 @@ def do_evaluation(cfg, model, distributed, **kwargs):
         output_folder = os.path.join(cfg.OUTPUT_DIR, "inference", dataset_name)
         if not os.path.exists(output_folder):
             mkdir(output_folder)
-        eval_result = inference(model, data_loader, dataset_name, device, output_folder, **kwargs)
+        eval_result = inference(
+            model, data_loader, dataset_name, device, output_folder, **kwargs
+        )
         eval_results.append(eval_result)
     return eval_results

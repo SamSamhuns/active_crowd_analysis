@@ -1,20 +1,23 @@
 import warnings
 import torchvision
-import torch
 
 try:
     import torch_extension
+
     _nms = torch_extension.nms
     print("torch_extension.nms!!!")
 except ImportError:
-    if torchvision.__version__ >= '0.3.0':
+    if torchvision.__version__ >= "0.3.0":
         print("torchvision.ops.nms!!!")
         _nms = torchvision.ops.nms
     else:
         from .python_nms import python_nms
+
         print("PYTHON NMS")
         _nms = python_nms
-        warnings.warn('You are using python version NMS because PyTorch version < 0.3.0')
+        warnings.warn(
+            "You are using python version NMS because PyTorch version < 0.3.0"
+        )
 """
 # Julie
 from .python_nms import python_nms
@@ -23,8 +26,9 @@ _nms = python_nms
 
 """
 
+
 def boxes_nms(boxes, scores, nms_thresh, max_count=-1):
-    """ Performs non-maximum suppression, run on GPU or CPU according to
+    """Performs non-maximum suppression, run on GPU or CPU according to
     boxes's device.
     Args:
         boxes(Tensor): `xyxy` mode boxes, use absolute coordinates(or relative coordinates), shape is (n, 4)

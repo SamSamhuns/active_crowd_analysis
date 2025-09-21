@@ -2,8 +2,7 @@ import torch
 import math
 
 
-def convert_locations_to_boxes(locations, priors, center_variance,
-                               size_variance):
+def convert_locations_to_boxes(locations, priors, center_variance, size_variance):
     """Convert regressional location results of SSD into boxes in the form of (center_x, center_y, h, w).
 
     The conversion:
@@ -22,20 +21,31 @@ def convert_locations_to_boxes(locations, priors, center_variance,
     # priors can have one dimension less.
     if priors.dim() + 1 == locations.dim():
         priors = priors.unsqueeze(0)
-    return torch.cat([
-        locations[..., :2] * center_variance * priors[..., 2:] + priors[..., :2],
-        torch.exp(locations[..., 2:] * size_variance) * priors[..., 2:]
-    ], dim=locations.dim() - 1)
+    return torch.cat(
+        [
+            locations[..., :2] * center_variance * priors[..., 2:] + priors[..., :2],
+            torch.exp(locations[..., 2:] * size_variance) * priors[..., 2:],
+        ],
+        dim=locations.dim() - 1,
+    )
 
 
-def convert_boxes_to_locations(center_form_boxes, center_form_priors, center_variance, size_variance):
+def convert_boxes_to_locations(
+    center_form_boxes, center_form_priors, center_variance, size_variance
+):
     # priors can have one dimension less
     if center_form_priors.dim() + 1 == center_form_boxes.dim():
         center_form_priors = center_form_priors.unsqueeze(0)
-    return torch.cat([
-        (center_form_boxes[..., :2] - center_form_priors[..., :2]) / center_form_priors[..., 2:] / center_variance,
-        torch.log(center_form_boxes[..., 2:] / center_form_priors[..., 2:]) / size_variance
-    ], dim=center_form_boxes.dim() - 1)
+    return torch.cat(
+        [
+            (center_form_boxes[..., :2] - center_form_priors[..., :2])
+            / center_form_priors[..., 2:]
+            / center_variance,
+            torch.log(center_form_boxes[..., 2:] / center_form_priors[..., 2:])
+            / size_variance,
+        ],
+        dim=center_form_boxes.dim() - 1,
+    )
 
 
 def area_of(left_top, right_bottom) -> torch.Tensor:
@@ -71,8 +81,7 @@ def iou_of(boxes0, boxes1, eps=1e-5):
     return overlap_area / (area0 + area1 - overlap_area + eps)
 
 
-def assign_priors(gt_boxes, gt_labels, corner_form_priors,
-                  iou_threshold):
+def assign_priors(gt_boxes, gt_labels, corner_form_priors, iou_threshold):
     """Assign ground truth boxes and targets to priors.
 
     Args:
@@ -127,12 +136,17 @@ def hard_negative_mining(loss, labels, neg_pos_ratio):
 
 
 def center_form_to_corner_form(locations):
-    return torch.cat([locations[..., :2] - locations[..., 2:] / 2,
-                      locations[..., :2] + locations[..., 2:] / 2], locations.dim() - 1)
+    return torch.cat(
+        [
+            locations[..., :2] - locations[..., 2:] / 2,
+            locations[..., :2] + locations[..., 2:] / 2,
+        ],
+        locations.dim() - 1,
+    )
 
 
 def corner_form_to_center_form(boxes):
-    return torch.cat([
-        (boxes[..., :2] + boxes[..., 2:]) / 2,
-        boxes[..., 2:] - boxes[..., :2]
-    ], boxes.dim() - 1)
+    return torch.cat(
+        [(boxes[..., :2] + boxes[..., 2:]) / 2, boxes[..., 2:] - boxes[..., :2]],
+        boxes.dim() - 1,
+    )

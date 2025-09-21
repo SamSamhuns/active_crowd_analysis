@@ -1,6 +1,5 @@
 import argparse
 import logging
-import os
 
 import torch
 import torch.utils.data
@@ -25,7 +24,9 @@ def evaluation(cfg, ckpt):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='SSD Evaluation on VOC and COCO dataset.')
+    parser = argparse.ArgumentParser(
+        description="SSD Evaluation on VOC and COCO dataset."
+    )
 
     parser.add_argument(
         "--ckpt",
@@ -33,7 +34,12 @@ def main():
         default=None,
         type=str,
     )
-    parser.add_argument("--output_dir", default="eval_results", type=str, help="The directory to store evaluation results.")
+    parser.add_argument(
+        "--output_dir",
+        default="eval_results",
+        type=str,
+        help="The directory to store evaluation results.",
+    )
     args = parser.parse_args()
 
     if torch.cuda.is_available():
@@ -51,5 +57,5 @@ def main():
     evaluation(cfg, ckpt=args.ckpt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,4 +1,3 @@
-import os
 import logging
 import torch
 
@@ -13,7 +12,7 @@ from utils.logger import setup_logger
 
 
 def train(cfg, model):
-    logger = logging.getLogger('SSD.trainer')
+    logger = logging.getLogger("SSD.trainer")
     device = torch.cuda.current_device()
     model.to(device)
 
@@ -25,16 +24,23 @@ def train(cfg, model):
 
     arguments = {"iteration": 0}
     save_to_disk = True
-    checkpointer = CheckPointer(model, optimizer, scheduler, cfg.OUTPUT_DIR, save_to_disk, logger)
+    checkpointer = CheckPointer(
+        model, optimizer, scheduler, cfg.OUTPUT_DIR, save_to_disk, logger
+    )
     checkpoint_data = checkpointer.load()
     arguments.update(checkpoint_data)
 
-    max_iter = cfg.SOLVER.MAX_ITER  # should be divided by num GPUs but right now multi gpu is not supported
-    train_loader = make_data_loader(cfg, is_train=True, max_iter=max_iter,
-                                    start_iter=arguments['iteration'])
+    max_iter = (
+        cfg.SOLVER.MAX_ITER
+    )  # should be divided by num GPUs but right now multi gpu is not supported
+    train_loader = make_data_loader(
+        cfg, is_train=True, max_iter=max_iter, start_iter=arguments["iteration"]
+    )
 
     print("|| train_loader || ", len(train_loader))
-    model = train_ssd_detector(cfg, model, train_loader, optimizer, scheduler, checkpointer, device, arguments)
+    model = train_ssd_detector(
+        cfg, model, train_loader, optimizer, scheduler, checkpointer, device, arguments
+    )
     return model
 
 
@@ -44,10 +50,10 @@ def main():
 
     model = SSDDetector(cfg)
     train(cfg, model)
-    logger.info('Start evaluating...')
+    logger.info("Start evaluating...")
     torch.cuda.empty_cache()  # speed up evaluating after training finished
     do_evaluation(cfg, model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

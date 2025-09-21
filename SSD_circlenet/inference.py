@@ -1,6 +1,5 @@
 import logging
 import os
-import random
 
 import torch
 import torch.utils.data
@@ -18,7 +17,7 @@ def compute_on_dataset(model, data_loader, device, sample_rate=1):
         # data_loader.dataset = torch.utils.data.random_split(data_loader.dataset, len(data_loader)*sample_rate)[0]
         pass
     elif sample_rate != 1:
-        raise AttributeError('sample_rate must be >0 and <= 1!')
+        raise AttributeError("sample_rate must be >0 and <= 1!")
     for batch in tqdm(data_loader):
         images, targets, image_ids = batch
         cpu_device = torch.device("cpu")
@@ -31,18 +30,31 @@ def compute_on_dataset(model, data_loader, device, sample_rate=1):
     return results_dict
 
 
-def inference(model, data_loader, dataset_name, device, sample_rate=1, output_folder=None, use_cached=False, **kwargs):
+def inference(
+    model,
+    data_loader,
+    dataset_name,
+    device,
+    sample_rate=1,
+    output_folder=None,
+    use_cached=False,
+    **kwargs,
+):
     dataset = data_loader.dataset
     logger = logging.getLogger("SSD.inference")
     logger.info("Evaluating {} dataset({} images):".format(dataset_name, len(dataset)))
-    predictions_path = os.path.join(output_folder, 'predictions.pth')
+    predictions_path = os.path.join(output_folder, "predictions.pth")
     if use_cached and os.path.exists(predictions_path):
-        predictions = torch.load(predictions_path, map_location='cpu')
+        predictions = torch.load(predictions_path, map_location="cpu")
     else:
-        predictions = compute_on_dataset(model, data_loader, device, sample_rate=sample_rate)
+        predictions = compute_on_dataset(
+            model, data_loader, device, sample_rate=sample_rate
+        )
     if output_folder:
         torch.save(predictions, predictions_path)
-    return evaluate(dataset=dataset, predictions=predictions, output_dir=output_folder, **kwargs)
+    return evaluate(
+        dataset=dataset, predictions=predictions, output_dir=output_folder, **kwargs
+    )
 
 
 @torch.no_grad()
@@ -55,6 +67,14 @@ def do_evaluation(cfg, model, sample_rate=1, **kwargs):
         output_folder = os.path.join(cfg.OUTPUT_DIR, "inference", dataset_name)
         if not os.path.exists(output_folder):
             mkdir(output_folder)
-        eval_result = inference(model, data_loader, dataset_name, device, sample_rate, output_folder, **kwargs)
+        eval_result = inference(
+            model,
+            data_loader,
+            dataset_name,
+            device,
+            sample_rate,
+            output_folder,
+            **kwargs,
+        )
         eval_results.append(eval_result)
     return eval_results

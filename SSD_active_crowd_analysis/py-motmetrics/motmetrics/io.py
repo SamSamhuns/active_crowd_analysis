@@ -23,23 +23,23 @@ import xmltodict
 class Format(Enum):
     """Enumerates supported file formats."""
 
-    MOT16 = 'mot16'
+    MOT16 = "mot16"
     """Milan, Anton, et al. "Mot16: A benchmark for multi-object tracking." arXiv preprint arXiv:1603.00831 (2016)."""
 
-    MOT15_2D = 'mot15-2D'
+    MOT15_2D = "mot15-2D"
     """Leal-Taixe, Laura, et al. "MOTChallenge 2015: Towards a benchmark for multi-target tracking." arXiv preprint arXiv:1504.01942 (2015)."""
 
-    VATIC_TXT = 'vatic-txt'
+    VATIC_TXT = "vatic-txt"
     """Vondrick, Carl, Donald Patterson, and Deva Ramanan. "Efficiently scaling up crowdsourced video annotation." International Journal of Computer Vision 101.1 (2013): 184-204.
     https://github.com/cvondrick/vatic
     """
 
-    DETRAC_MAT = 'detrac-mat'
+    DETRAC_MAT = "detrac-mat"
     """Wen, Longyin et al. "UA-DETRAC: A New Benchmark and Protocol for Multi-Object Detection and Tracking." arXiv preprint arXiv:arXiv:1511.04136 (2016).
     http://detrac-db.rit.albany.edu/download
     """
 
-    DETRAC_XML = 'detrac-xml'
+    DETRAC_XML = "detrac-xml"
     """Wen, Longyin et al. "UA-DETRAC: A New Benchmark and Protocol for Multi-Object Detection and Tracking." arXiv preprint arXiv:arXiv:1511.04136 (2016).
     http://detrac-db.rit.albany.edu/download
     """
@@ -71,26 +71,37 @@ def load_motchallenge(fname, **kwargs):
         The dataframe is indexed by ('FrameId', 'Id')
     """
 
-    sep = kwargs.pop('sep', r'\s+|\t+|,')
-    min_confidence = kwargs.pop('min_confidence', -1)
+    sep = kwargs.pop("sep", r"\s+|\t+|,")
+    min_confidence = kwargs.pop("min_confidence", -1)
     df = pd.read_csv(
         fname,
         sep=sep,
         index_col=[0, 1],
         skipinitialspace=True,
         header=None,
-        names=['FrameId', 'Id', 'X', 'Y', 'Width', 'Height', 'Confidence', 'ClassId', 'Visibility', 'unused'],
-        engine='python'
+        names=[
+            "FrameId",
+            "Id",
+            "X",
+            "Y",
+            "Width",
+            "Height",
+            "Confidence",
+            "ClassId",
+            "Visibility",
+            "unused",
+        ],
+        engine="python",
     )
 
     # Account for matlab convention.
-    df[['X', 'Y']] -= (1, 1)
+    df[["X", "Y"]] -= (1, 1)
 
     # Removed trailing column
-    del df['unused']
+    del df["unused"]
 
     # Remove all rows without sufficient confidence
-    return df[df['Confidence'] >= min_confidence]
+    return df[df["Confidence"] >= min_confidence]
 
 
 def load_vatictxt(fname, **kwargs):
@@ -125,7 +136,7 @@ def load_vatictxt(fname, **kwargs):
     """
     # pylint: disable=too-many-locals
 
-    sep = kwargs.pop('sep', ' ')
+    sep = kwargs.pop("sep", " ")
 
     with io.open(fname) as f:
         # First time going over file, we collect the set of all variable activities
@@ -140,45 +151,62 @@ def load_vatictxt(fname, **kwargs):
         f.seek(0)
         for line in f:
             fields = line.rstrip().split()
-            attrs = ['0'] * len(activitylist)
+            attrs = ["0"] * len(activitylist)
             for a in fields[10:]:
-                attrs[activitylist.index(a)] = '1'
+                attrs[activitylist.index(a)] = "1"
             fields = fields[:10]
             fields.extend(attrs)
-            data.append(' '.join(fields))
+            data.append(" ".join(fields))
 
-        strdata = '\n'.join(data)
+        strdata = "\n".join(data)
 
         dtype = {
-            'Id': np.int64,
-            'X': np.float32,
-            'Y': np.float32,
-            'Width': np.float32,
-            'Height': np.float32,
-            'FrameId': np.int64,
-            'Lost': bool,
-            'Occluded': bool,
-            'Generated': bool,
-            'ClassId': str,
+            "Id": np.int64,
+            "X": np.float32,
+            "Y": np.float32,
+            "Width": np.float32,
+            "Height": np.float32,
+            "FrameId": np.int64,
+            "Lost": bool,
+            "Occluded": bool,
+            "Generated": bool,
+            "ClassId": str,
         }
 
         # Remove quotes from activities
-        activitylist = [a.replace('\"', '').capitalize() for a in activitylist]
+        activitylist = [a.replace('"', "").capitalize() for a in activitylist]
 
         # Add dtypes for activities
         for a in activitylist:
             dtype[a] = bool
 
         # Read from CSV
-        names = ['Id', 'X', 'Y', 'Width', 'Height', 'FrameId', 'Lost', 'Occluded', 'Generated', 'ClassId']
+        names = [
+            "Id",
+            "X",
+            "Y",
+            "Width",
+            "Height",
+            "FrameId",
+            "Lost",
+            "Occluded",
+            "Generated",
+            "ClassId",
+        ]
         names.extend(activitylist)
-        df = pd.read_csv(io.StringIO(strdata), names=names, index_col=['FrameId', 'Id'], header=None, sep=' ')
+        df = pd.read_csv(
+            io.StringIO(strdata),
+            names=names,
+            index_col=["FrameId", "Id"],
+            header=None,
+            sep=" ",
+        )
 
         # Correct Width and Height which are actually XMax, Ymax in files.
-        w = df['Width'] - df['X']
-        h = df['Height'] - df['Y']
-        df['Width'] = w
-        df['Height'] = h
+        w = df["Width"] - df["X"]
+        h = df["Height"] - df["Y"]
+        df["Width"] = w
+        df["Height"] = h
 
         return df
 
@@ -210,11 +238,11 @@ def load_detrac_mat(fname):
 
     matData = scipy.io.loadmat(fname)
 
-    frameList = matData['gtInfo'][0][0][4][0]
-    leftArray = matData['gtInfo'][0][0][0]
-    topArray = matData['gtInfo'][0][0][1]
-    widthArray = matData['gtInfo'][0][0][3]
-    heightArray = matData['gtInfo'][0][0][2]
+    frameList = matData["gtInfo"][0][0][4][0]
+    leftArray = matData["gtInfo"][0][0][0]
+    topArray = matData["gtInfo"][0][0][1]
+    widthArray = matData["gtInfo"][0][0][3]
+    heightArray = matData["gtInfo"][0][0][2]
 
     parsedGT = []
     for f in frameList:
@@ -233,15 +261,28 @@ def load_detrac_mat(fname):
             row.append(-1)
             parsedGT.append(row)
 
-    df = pd.DataFrame(parsedGT,
-                      columns=['FrameId', 'Id', 'X', 'Y', 'Width', 'Height', 'Confidence', 'ClassId', 'Visibility', 'unused'])
-    df.set_index(['FrameId', 'Id'], inplace=True)
+    df = pd.DataFrame(
+        parsedGT,
+        columns=[
+            "FrameId",
+            "Id",
+            "X",
+            "Y",
+            "Width",
+            "Height",
+            "Confidence",
+            "ClassId",
+            "Visibility",
+            "unused",
+        ],
+    )
+    df.set_index(["FrameId", "Id"], inplace=True)
 
     # Account for matlab convention.
-    df[['X', 'Y']] -= (1, 1)
+    df[["X", "Y"]] -= (1, 1)
 
     # Removed trailing column
-    del df['unused']
+    del df["unused"]
 
     return df
 
@@ -270,38 +311,51 @@ def load_detrac_xml(fname):
 
     with io.open(fname) as fd:
         doc = xmltodict.parse(fd.read())
-    frameList = doc['sequence']['frame']
+    frameList = doc["sequence"]["frame"]
 
     parsedGT = []
     for f in frameList:
-        fid = int(f['@num'])
-        targetList = f['target_list']['target']
+        fid = int(f["@num"])
+        targetList = f["target_list"]["target"]
         if not isinstance(targetList, list):
             targetList = [targetList]
 
         for t in targetList:
             row = []
             row.append(fid)
-            row.append(int(t['@id']))
-            row.append(float(t['box']['@left']))
-            row.append(float(t['box']['@top']))
-            row.append(float(t['box']['@width']))
-            row.append(float(t['box']['@height']))
+            row.append(int(t["@id"]))
+            row.append(float(t["box"]["@left"]))
+            row.append(float(t["box"]["@top"]))
+            row.append(float(t["box"]["@width"]))
+            row.append(float(t["box"]["@height"]))
             row.append(1)
             row.append(-1)
             row.append(-1)
             row.append(-1)
             parsedGT.append(row)
 
-    df = pd.DataFrame(parsedGT,
-                      columns=['FrameId', 'Id', 'X', 'Y', 'Width', 'Height', 'Confidence', 'ClassId', 'Visibility', 'unused'])
-    df.set_index(['FrameId', 'Id'], inplace=True)
+    df = pd.DataFrame(
+        parsedGT,
+        columns=[
+            "FrameId",
+            "Id",
+            "X",
+            "Y",
+            "Width",
+            "Height",
+            "Confidence",
+            "ClassId",
+            "Visibility",
+            "unused",
+        ],
+    )
+    df.set_index(["FrameId", "Id"], inplace=True)
 
     # Account for matlab convention.
-    df[['X', 'Y']] -= (1, 1)
+    df[["X", "Y"]] -= (1, 1)
 
     # Removed trailing column
-    del df['unused']
+    del df["unused"]
 
     return df
 
@@ -315,7 +369,7 @@ def loadtxt(fname, fmt=Format.MOT15_2D, **kwargs):
         Format.MOT15_2D: load_motchallenge,
         Format.VATIC_TXT: load_vatictxt,
         Format.DETRAC_MAT: load_detrac_mat,
-        Format.DETRAC_XML: load_detrac_xml
+        Format.DETRAC_XML: load_detrac_xml,
     }
     func = switcher.get(fmt)
     return func(fname, **kwargs)
@@ -361,23 +415,23 @@ def render_summary(summary, formatters=None, namemap=None, buf=None):
 
 
 motchallenge_metric_names = {
-    'idf1': 'IDF1',
-    'idp': 'IDP',
-    'idr': 'IDR',
-    'recall': 'Rcll',
-    'precision': 'Prcn',
-    'num_unique_objects': 'GT',
-    'mostly_tracked': 'MT',
-    'partially_tracked': 'PT',
-    'mostly_lost': 'ML',
-    'num_false_positives': 'FP',
-    'num_misses': 'FN',
-    'num_switches': 'IDs',
-    'num_fragmentations': 'FM',
-    'mota': 'MOTA',
-    'motp': 'MOTP',
-    'num_transfer': 'IDt',
-    'num_ascend': 'IDa',
-    'num_migrate': 'IDm',
+    "idf1": "IDF1",
+    "idp": "IDP",
+    "idr": "IDR",
+    "recall": "Rcll",
+    "precision": "Prcn",
+    "num_unique_objects": "GT",
+    "mostly_tracked": "MT",
+    "partially_tracked": "PT",
+    "mostly_lost": "ML",
+    "num_false_positives": "FP",
+    "num_misses": "FN",
+    "num_switches": "IDs",
+    "num_fragmentations": "FM",
+    "mota": "MOTA",
+    "motp": "MOTP",
+    "num_transfer": "IDt",
+    "num_ascend": "IDa",
+    "num_migrate": "IDm",
 }
 """A list mappings for metric names to comply with MOTChallenge."""

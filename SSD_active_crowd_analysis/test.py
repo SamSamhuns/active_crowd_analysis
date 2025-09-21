@@ -9,7 +9,7 @@ from ssd.config import cfg
 from ssd.engine.inference import do_evaluation
 from ssd.modeling.detector import build_detection_model
 from ssd.utils import dist_util
-from ssd.utils.checkpoint import CheckPointer 
+from ssd.utils.checkpoint import CheckPointer
 from ssd.utils.dist_util import synchronize
 from ssd.utils.logger import setup_logger
 
@@ -22,14 +22,16 @@ def evaluation(cfg, ckpt, distributed):
     model = build_detection_model(cfg)
     checkpointer = CheckPointer(model, save_dir=cfg.OUTPUT_DIR, logger=logger)
     device = torch.device(cfg.MODEL.DEVICE)
-    #model.load_state_dict(torch.load('outputs/vgg_ssd300_voc0712.pth'), strict=False)
+    # model.load_state_dict(torch.load('outputs/vgg_ssd300_voc0712.pth'), strict=False)
     model.to(device)
     checkpointer.load(ckpt, use_latest=ckpt is None)
     do_evaluation(cfg, model, distributed)
 
 
 def main():
-    parser = argparse.ArgumentParser(description='SSD Evaluation on VOC and COCO dataset.')
+    parser = argparse.ArgumentParser(
+        description="SSD Evaluation on VOC and COCO dataset."
+    )
     parser.add_argument(
         "--config-file",
         default="",
@@ -45,7 +47,12 @@ def main():
         type=str,
     )
 
-    parser.add_argument("--output_dir", default="eval_results", type=str, help="The directory to store evaluation results.")
+    parser.add_argument(
+        "--output_dir",
+        default="eval_results",
+        type=str,
+        help="The directory to store evaluation results.",
+    )
 
     parser.add_argument(
         "opts",
@@ -80,12 +87,12 @@ def main():
         config_str = "\n" + cf.read()
         logger.info(config_str)
     logger.info("Running with config:\n{}".format(cfg))
-    
+
     # Distance Regression evaluation metrics
     generate_eval_metrics()
 
     evaluation(cfg, ckpt=args.ckpt, distributed=distributed)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -18,7 +18,7 @@ from motmetrics.mot import MOTAccumulator
 from motmetrics.preprocess import preprocessResult
 
 
-def compare_to_groundtruth(gt, dt, dist='iou', distfields=None, distth=0.5):
+def compare_to_groundtruth(gt, dt, dist="iou", distfields=None, distth=0.5):
     """Compare groundtruth and detector results.
 
     This method assumes both results are given in terms of DataFrames with at least the following fields
@@ -45,7 +45,7 @@ def compare_to_groundtruth(gt, dt, dist='iou', distfields=None, distth=0.5):
     """
     # pylint: disable=too-many-locals
     if distfields is None:
-        distfields = ['X', 'Y', 'Width', 'Height']
+        distfields = ["X", "Y", "Width", "Height"]
 
     def compute_iou(a, b):
         return iou_matrix(a, b, max_iou=distth)
@@ -53,7 +53,7 @@ def compare_to_groundtruth(gt, dt, dist='iou', distfields=None, distth=0.5):
     def compute_euc(a, b):
         return norm2squared_matrix(a, b, max_d2=distth)
 
-    compute_dist = compute_iou if dist.upper() == 'IOU' else compute_euc
+    compute_dist = compute_iou if dist.upper() == "IOU" else compute_euc
 
     acc = MOTAccumulator()
 
@@ -64,8 +64,8 @@ def compare_to_groundtruth(gt, dt, dist='iou', distfields=None, distth=0.5):
 
     gt = gt[distfields]
     dt = dt[distfields]
-    fid_to_fgt = dict(iter(gt.groupby('FrameId')))
-    fid_to_fdt = dict(iter(dt.groupby('FrameId')))
+    fid_to_fgt = dict(iter(gt.groupby("FrameId")))
+    fid_to_fdt = dict(iter(dt.groupby("FrameId")))
 
     for fid in allframeids:
         oids = np.empty(0)
@@ -86,7 +86,16 @@ def compare_to_groundtruth(gt, dt, dist='iou', distfields=None, distth=0.5):
     return acc
 
 
-def CLEAR_MOT_M(gt, dt, inifile, dist='iou', distfields=None, distth=0.5, include_all=False, vflag=''):
+def CLEAR_MOT_M(
+    gt,
+    dt,
+    inifile,
+    dist="iou",
+    distfields=None,
+    distth=0.5,
+    include_all=False,
+    vflag="",
+):
     """Compare groundtruth and detector results.
 
     This method assumes both results are given in terms of DataFrames with at least the following fields
@@ -113,7 +122,7 @@ def CLEAR_MOT_M(gt, dt, inifile, dist='iou', distfields=None, distth=0.5, includ
     """
     # pylint: disable=too-many-locals
     if distfields is None:
-        distfields = ['X', 'Y', 'Width', 'Height']
+        distfields = ["X", "Y", "Width", "Height"]
 
     def compute_iou(a, b):
         return iou_matrix(a, b, max_iou=distth)
@@ -121,19 +130,19 @@ def CLEAR_MOT_M(gt, dt, inifile, dist='iou', distfields=None, distth=0.5, includ
     def compute_euc(a, b):
         return norm2squared_matrix(a, b, max_d2=distth)
 
-    compute_dist = compute_iou if dist.upper() == 'IOU' else compute_euc
+    compute_dist = compute_iou if dist.upper() == "IOU" else compute_euc
 
     acc = MOTAccumulator()
     dt = preprocessResult(dt, gt, inifile)
     if include_all:
-        gt = gt[gt['Confidence'] >= 0.99]
+        gt = gt[gt["Confidence"] >= 0.99]
     else:
-        gt = gt[(gt['Confidence'] >= 0.99) & (gt['ClassId'] == 1)]
+        gt = gt[(gt["Confidence"] >= 0.99) & (gt["ClassId"] == 1)]
     # We need to account for all frames reported either by ground truth or
     # detector. In case a frame is missing in GT this will lead to FPs, in
     # case a frame is missing in detector results this will lead to FNs.
     allframeids = gt.index.union(dt.index).levels[0]
-    analysis = {'hyp': {}, 'obj': {}}
+    analysis = {"hyp": {}, "obj": {}}
     for fid in allframeids:
         oids = np.empty(0)
         hids = np.empty(0)
@@ -144,18 +153,18 @@ def CLEAR_MOT_M(gt, dt, inifile, dist='iou', distfields=None, distth=0.5, includ
             oids = fgt.index.values
             for oid in oids:
                 oid = int(oid)
-                if oid not in analysis['obj']:
-                    analysis['obj'][oid] = 0
-                analysis['obj'][oid] += 1
+                if oid not in analysis["obj"]:
+                    analysis["obj"][oid] = 0
+                analysis["obj"][oid] += 1
 
         if fid in dt.index:
             fdt = dt.loc[fid]
             hids = fdt.index.values
             for hid in hids:
                 hid = int(hid)
-                if hid not in analysis['hyp']:
-                    analysis['hyp'][hid] = 0
-                analysis['hyp'][hid] += 1
+                if hid not in analysis["hyp"]:
+                    analysis["hyp"][hid] = 0
+                analysis["hyp"][hid] += 1
 
         if oids.shape[0] > 0 and hids.shape[0] > 0:
             dists = compute_dist(fgt[distfields].values, fdt[distfields].values)

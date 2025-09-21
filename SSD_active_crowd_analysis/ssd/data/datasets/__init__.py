@@ -5,8 +5,8 @@ from .voc import VOCDataset
 from .coco import COCODataset
 
 _DATASETS = {
-    'VOCDataset': VOCDataset,
-    'COCODataset': COCODataset,
+    "VOCDataset": VOCDataset,
+    "COCODataset": COCODataset,
 }
 
 
@@ -15,14 +15,14 @@ def build_dataset(dataset_list, transform=None, target_transform=None, is_train=
     datasets = []
     for dataset_name in dataset_list:
         data = DatasetCatalog.get(dataset_name)
-        args = data['args']
-        factory = _DATASETS[data['factory']]
-        args['transform'] = transform
-        args['target_transform'] = target_transform
+        args = data["args"]
+        factory = _DATASETS[data["factory"]]
+        args["transform"] = transform
+        args["target_transform"] = target_transform
         if factory == VOCDataset:
-            args['keep_difficult'] = not is_train
+            args["keep_difficult"] = not is_train
         elif factory == COCODataset:
-            args['remove_empty'] = is_train
+            args["remove_empty"] = is_train
         dataset = factory(**args)
         datasets.append(dataset)
     # for testing, return a list of datasets
